@@ -3,67 +3,26 @@
 <head>
   <meta charset="UTF-8">
   <title>Consulta de Prazos</title>
-  <script src="script.js" defer></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 40px;
-      background-image: url('fundo.jpg'); /* coloque o nome da sua imagem */
-      background-size: cover;
-      background-attachment: fixed;
-      color: #fff;
-    }
-    h1 { color: #fff; text-shadow: 2px 2px 5px #000; }
-    .caixa {
-      background: rgba(0,0,0,0.6);
-      padding: 20px;
-      border-radius: 10px;
-      max-width: 700px;
-    }
-    input {
-      padding: 8px;
-      width: 300px;
-      border-radius: 5px;
-      border: none;
-    }
-    ul.sugestoes {
-      list-style: none;
-      padding: 0;
-      margin-top: 5px;
-      background: #fff;
-      color: #000;
-      border-radius: 5px;
-      max-width: 300px;
-      position: absolute;
-      z-index: 1000;
-    }
-    ul.sugestoes li {
-      padding: 5px;
-      cursor: pointer;
-    }
-    ul.sugestoes li:hover {
-      background: #ddd;
-    }
-    table {
-      margin-top: 20px;
-      border-collapse: collapse;
-      width: 100%;
-      background: rgba(255,255,255,0.9);
-      color: #000;
-    }
-    th, td {
-      border: 1px solid #ccc;
-      padding: 8px 12px;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="caixa">
-    <h1>Consulta de Prazos de Entrega</h1>
-    <input type="text" id="cidadeInput" placeholder="Digite a cidade" oninput="mostrarSugestoes()">
-    <ul id="sugestoes" class="sugestoes"></ul>
-    
-    <div id="resultado"></div>
+  <div class="container">
+    <h1>Consulta de Prazos</h1>
+    <input type="text" id="search" placeholder="Digite a cidade..." autocomplete="off">
+    <ul id="suggestions"></ul>
+    <table id="results">
+      <thead>
+        <tr>
+          <th>Cidade</th>
+          <th>Transportadora</th>
+          <th>Prazo</th>
+          <th>Dias de Atendimento</th>
+          <th>Capital / Interior</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
   </div>
+  <script src="script.js"></script>
 </body>
 </html>

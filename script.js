@@ -1,70 +1,60 @@
 let dados = [];
 
-// Carrega o arquivo CSV
-fetch("prazos.csv")
-  .then(res => res.text())
-  .then(texto => {
-    const linhas = texto.trim().split("\n");
-    linhas.slice(1).forEach(linha => {
-      const [cidade, transportadora, prazo, dias, regiao] = linha.split(",");
-      dados.push({
-        cidade: cidade.trim(),
-        transportadora: transportadora.trim(),
-        prazo: prazo.trim(),
-        dias: dias.trim(),
-        regiao: regiao.trim()
-      });
+// Carrega o CSV
+fetch("dados.csv")
+  .then(response => response.text())
+  .then(text => {
+    dados = text.split("\n").slice(1).map(linha => {
+      const [cidade, transportadora, prazo, dias, tipo] = linha.split(",");
+      return { cidade, transportadora, prazo, dias, tipo };
     });
   });
 
-// Mostra sugestões enquanto digita
-function mostrarSugestoes() {
-  const input = document.getElementById("cidadeInput").value.toLowerCase();
-  const listaSugestoes = document.getElementById("sugestoes");
-  listaSugestoes.innerHTML = "";
+// Elementos
+const search = document.getElementById("search");
+const suggestions = document.getElementById("suggestions");
+const tbody = document.querySelector("#results tbody");
 
-  if (input.length > 0) {
-    const sugestoes = dados.filter(d => d.cidade.toLowerCase().includes(input));
-    sugestoes.slice(0,5).forEach(s => {
+// Função de sugestões
+search.addEventListener("input", () => {
+  const termo = search.value.toLowerCase();
+  suggestions.innerHTML = "";
+  if (termo.length > 0) {
+    const filtrados = dados.filter(d => d.cidade.toLowerCase().includes(termo));
+    filtrados.slice(0, 5).forEach(d => {
       const li = document.createElement("li");
-      li.textContent = s.cidade;
+      li.textContent = d.cidade;
       li.onclick = () => {
-        document.getElementById("cidadeInput").value = s.cidade;
-        listaSugestoes.innerHTML = "";
-        buscarPrazo();
+        search.value = d.cidade;
+        suggestions.innerHTML = "";
+        mostrarResultados(d.cidade);
       };
-      listaSugestoes.appendChild(li);
+      suggestions.appendChild(li);
     });
   }
-}
+});
 
-// Busca e mostra resultado
-function buscarPrazo() {
-  const cidadeInput = document.getElementById("cidadeInput").value.trim().toLowerCase();
-  const resultadoDiv = document.getElementById("resultado");
-  
-  const resultado = dados.find(d => d.cidade.toLowerCase() === cidadeInput);
-
-  if (resultado) {
-    resultadoDiv.innerHTML = `
-      <table>
-        <tr>
-          <th>Cidade</th>
-          <th>Transportadora</th>
-          <th>Prazo (dias)</th>
-          <th>Dias de atendimento</th>
-          <th>Capital / Interior</th>
-        </tr>
-        <tr>
-          <td>${resultado.cidade}</td>
-          <td>${resultado.transportadora}</td>
-          <td>${resultado.prazo}</td>
-          <td>${resultado.dias}</td>
-          <td>${resultado.regiao}</td>
-        </tr>
-      </table>
-    `;
-  } else {
-    resultadoDiv.innerHTML = `<p style="color:yellow;">Cidade não encontrada.</p>`;
+// Enter para pesquisar
+search.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    mostrarResultados(search.value);
+    suggestions.innerHTML = "";
   }
+});
+
+// Mostrar tabela
+function mostrarResultados(cidade) {
+  tbody.innerHTML = "";
+  const filtrados = dados.filter(d => d.cidade.toLowerCase() === cidade.toLowerCase());
+  filtrados.forEach(d => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${d.cidade}</td>
+      <td>${d.transportadora}</td>
+      <td>${d.prazo}</td>
+      <td>${d.dias}</td>
+      <td>${d.tipo}</td>
+    `;
+    tbody.appendChild(tr);
+  });
 }
