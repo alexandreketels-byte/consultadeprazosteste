@@ -5,7 +5,7 @@ fetch("dados.csv")
   .then(response => response.text())
   .then(text => {
     dados = text.split("\n").slice(1).map(linha => {
-      const [cidade, transportadora, prazo, tipo] = linha.split(",");
+      const [cidade, transportadora,UF, prazo, tipo] = linha.split(",");
       return { cidade, transportadora, prazo, tipo };
     });
   });
@@ -51,6 +51,7 @@ function mostrarResultados(cidade) {
     tr.innerHTML = `
       <td>${d.cidade}</td>
       <td>${d.transportadora}</td>
+      <td>${d.UF}</td>
       <td>${d.prazo}</td>
       <td>${d.tipo}</td>
     `;
