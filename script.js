@@ -1,61 +1,52 @@
 let dados = [];
 
-// Carrega o CSV
-fetch("dados.csv")
-  .then(response => response.text())
-  .then(text => {
-    dados = text.split("\n").slice(1).map(linha => {
-      const [cidade, transportadora, uf, prazo, dias, tipo] = linha.split(",");
-      return { cidade, transportadora, uf, prazo, dias, tipo };
+async function carregarCSV() {
+    const response = await fetch('prazos.csv');
+    const data = await response.text();
+
+    const linhas = data.split('\n').map(l => l.trim()).filter(l => l);
+    const cabecalho = linhas[0].split(',');
+
+    dados = linhas.slice(1).map(linha => {
+        const valores = linha.split(',');
+        let obj = {};
+        cabecalho.forEach((coluna, i) => {
+            obj[coluna.trim()] = valores[i] ? valores[i].trim() : "";
+        });
+        return obj;
     });
-  });
-
-// Elementos
-const search = document.getElementById("search");
-const suggestions = document.getElementById("suggestions");
-const tbody = document.querySelector("#results tbody");
-
-// Sugestões enquanto digita
-search.addEventListener("input", () => {
-  const termo = search.value.toLowerCase();
-  suggestions.innerHTML = "";
-  if (termo.length > 0) {
-    const filtrados = dados.filter(d => d.cidade.toLowerCase().includes(termo));
-    filtrados.slice(0, 5).forEach(d => {
-      const li = document.createElement("li");
-      li.textContent = d.cidade;
-      li.onclick = () => {
-        search.value = d.cidade;
-        suggestions.innerHTML = "";
-        mostrarResultados(d.cidade);
-      };
-      suggestions.appendChild(li);
-    });
-  }
-});
-
-// Enter para pesquisar
-search.addEventListener("keydown", e => {
-  if (e.key === "Enter") {
-    mostrarResultados(search.value);
-    suggestions.innerHTML = "";
-  }
-});
-
-// Mostrar tabela
-function mostrarResultados(cidade) {
-  tbody.innerHTML = "";
-  const filtrados = dados.filter(d => d.cidade.toLowerCase() === cidade.toLowerCase());
-  filtrados.forEach(d => {
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${d.cidade}</td>
-      <td>${d.transportadora}</td>
-      <td>${d.uf}</td>
-      <td>${d.prazo}</td>
-      <td>${d.dias}</td>
-      <td>${d.tipo}</td>
-    `;
-    tbody.appendChild(tr);
-  });
 }
+
+function exibirResultados(filtrados) {
+    const tabela = document.getElementById('resultado');
+    tabela.innerHTML = "";
+
+    filtrados.forEach(linha => {
+        let tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${linha["Cidade"]}</td>
+            <td>${linha["Transportadora"]}</td>
+            <td>${linha["UF"]}</td>
+            <td>${linha["Prazo/Dias"]}</td>
+            <td>${linha["Capital/Interior"]}</td>
+        `;
+        tabela.appendChild(tr);
+    });
+}
+
+document.getElementById("pesquisa").addEventListener("input", function () {
+    const termo = this.value.toLowerCase();
+    const filtrados = dados.filter(l => l["Cidade"].toLowerCase().includes(termo));
+    exibirResultados(filtrados);
+});
+
+document.getElementById("pesquisa").addEventListener("keypress", function (e) {
+    if (e.key === "Enter") {
+        e.preventDefault();
+        const termo = this.value.toLowerCase();
+        const filtrados = dados.filter(l => l["Cidade"].toLowerCase().includes(termo));
+        exibirResultados(filtrados);
+    }
+});
+
+carregarCSV();
