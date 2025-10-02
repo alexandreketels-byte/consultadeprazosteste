@@ -5,8 +5,8 @@ fetch("dados.csv")
   .then(response => response.text())
   .then(text => {
     dados = text.split("\n").slice(1).map(linha => {
-      const [cidade, transportadora, uf, prazo, tipo] = linha.split(",");
-      return { cidade, transportadora, uf, prazo, tipo };
+      const [cidade, transportadora, uf, prazo, dias, tipo] = linha.split(",");
+      return { cidade, transportadora, uf, prazo, dias, tipo };
     });
   });
 
@@ -15,7 +15,7 @@ const search = document.getElementById("search");
 const suggestions = document.getElementById("suggestions");
 const tbody = document.querySelector("#results tbody");
 
-// Função de sugestões
+// Sugestões enquanto digita
 search.addEventListener("input", () => {
   const termo = search.value.toLowerCase();
   suggestions.innerHTML = "";
@@ -53,6 +53,7 @@ function mostrarResultados(cidade) {
       <td>${d.transportadora}</td>
       <td>${d.uf}</td>
       <td>${d.prazo}</td>
+      <td>${d.dias}</td>
       <td>${d.tipo}</td>
     `;
     tbody.appendChild(tr);
