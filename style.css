@@ -65,12 +65,12 @@ th {
   background: rgba(0,0,0,0.9);
 }
 .link-uf {
-  color: #ffd700;
+  color: yellow;
   font-weight: bold;
   text-decoration: underline;
   display: inline-block;
   margin-bottom: 20px;
 }
 .link-uf:hover {
-  color: #fff;
+  color: gold;
 }
