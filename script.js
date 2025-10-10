@@ -32,7 +32,7 @@ function removerAcentos(str) {
   return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
-// Mostrar resultados
+// Mostrar resultados exatos
 function mostrarResultados(filtrados) {
   tbody.innerHTML = "";
   if (filtrados.length === 0) {
@@ -56,21 +56,28 @@ function mostrarResultados(filtrados) {
   contador.textContent = `${filtrados.length} resultado${filtrados.length > 1 ? "s" : ""} encontrado${filtrados.length > 1 ? "s" : ""}`;
 }
 
-// Filtro geral (ignorando acentos)
+// Busca exata (sem acento)
 function buscar(termo) {
-  const termoNormalizado = removerAcentos(termo.toLowerCase());
+  const termoNormalizado = removerAcentos(termo.trim().toLowerCase());
+
   const filtrados = dados.filter(d => {
     const cidade = removerAcentos(d.cidade?.toLowerCase() || "");
     const transp = removerAcentos(d.transportadora?.toLowerCase() || "");
     const uf = removerAcentos(d.uf?.toLowerCase() || "");
-    return cidade.includes(termoNormalizado) || transp.includes(termoNormalizado) || uf.includes(termoNormalizado);
+    // Busca exata — precisa ser igual
+    return (
+      cidade === termoNormalizado ||
+      transp === termoNormalizado ||
+      uf === termoNormalizado
+    );
   });
+
   mostrarResultados(filtrados);
 }
 
-// Sugestões automáticas (também ignorando acentos)
+// Sugestões (contém o termo digitado)
 inputGeral.addEventListener("input", () => {
-  const termo = inputGeral.value.toLowerCase();
+  const termo = inputGeral.value.trim().toLowerCase();
   const termoNormalizado = removerAcentos(termo);
   sugestoes.innerHTML = "";
   if (termo.length < 2) return;
@@ -92,7 +99,7 @@ inputGeral.addEventListener("input", () => {
   });
 });
 
-// Pressionar Enter
+// Pressionar Enter → busca exata
 inputGeral.addEventListener("keydown", e => {
   if (e.key === "Enter") {
     sugestoes.innerHTML = "";
