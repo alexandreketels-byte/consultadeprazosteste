@@ -7,13 +7,10 @@ fetch("dados.csv")
     if (!isNaN(dataArquivo)) {
       const opcoes = { 
         day: "2-digit", month: "2-digit", year: "numeric", 
-        hour: "2-digit", minute: "2-digit" 
+        hour: "2-digit", minute: "2-digit"
       };
       document.getElementById("ultimaAtualizacao").textContent =
         "Última atualização: " + dataArquivo.toLocaleString("pt-BR", opcoes);
-    } else {
-      document.getElementById("ultimaAtualizacao").textContent =
-        "Última atualização: (não disponível)";
     }
     return response.text();
   })
@@ -25,72 +22,84 @@ fetch("dados.csv")
   });
 
 // Elementos
-
 const tbody = document.querySelector("#results tbody");
+const inputGeral = document.getElementById("searchGeral");
+const sugestoes = document.getElementById("suggestionsGeral");
+const contador = document.getElementById("contadorResultados");
 
-
-// Função genérica de sugestões
-function configurarPesquisa(campoInput, campoSugestoes, propriedade) {
-  campoInput.addEventListener("input", () => {
-    const termo = campoInput.value.toLowerCase();
-    campoSugestoes.innerHTML = "";
-    if (termo.length > 0) {
-      const filtrados = dados.filter(d => d[propriedade]?.toLowerCase().includes(termo));
-      const unicos = [...new Set(filtrados.map(d => d[propriedade]))]; // evitar repetições
-      unicos.slice(0, 5).forEach(valor => {
-        const li = document.createElement("li");
-        li.textContent = valor;
-        li.onclick = () => {
-          campoInput.value = valor;
-          campoSugestoes.innerHTML = "";
-          mostrarResultados(valor, propriedade);
-        };
-        campoSugestoes.appendChild(li);
-      });
-    }
-  });
-  
-  // Pressionar Enter também pesquisa
-  campoInput.addEventListener("keydown", e => {
-    if (e.key === "Enter") {
-      mostrarResultados(campoInput.value, propriedade);
-      campoSugestoes.innerHTML = "";
-    }
-  });
+// Destacar termo
+function destacar(texto, termo) {
+  if (!termo) return texto;
+  const regex = new RegExp(termo, "gi");
+  return texto.replace(regex, match => `<mark>${match}</mark>`);
 }
-  
-// Mostrar resultados na tabela
-function mostrarResultados(valor, campo) {
+
+// Mostrar resultados
+function mostrarResultados(filtrados, termo) {
   tbody.innerHTML = "";
-  const filtrados = dados.filter(d => d[campo]?.toLowerCase().includes(valor.toLowerCase()));
+  if (filtrados.length === 0) {
+    tbody.innerHTML = "<tr><td colspan='5'>Nenhum resultado encontrado.</td></tr>";
+    contador.textContent = "";
+    return;
+  }
+
   filtrados.forEach(d => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${d.cidade}</td>
-      <td>${d.transportadora}</td>
-      <td>${d.uf}</td>
-      <td>${d.prazo}</td>
-      <td>${d.tipo}</td>
+      <td>${destacar(d.cidade || "", termo)}</td>
+      <td>${destacar(d.transportadora || "", termo)}</td>
+      <td>${destacar(d.uf || "", termo)}</td>
+      <td>${d.prazo || ""}</td>
+      <td>${d.tipo || ""}</td>
     `;
     tbody.appendChild(tr);
   });
+
+  contador.textContent = `${filtrados.length} resultado${filtrados.length > 1 ? "s" : ""} encontrado${filtrados.length > 1 ? "s" : ""}`;
 }
 
-// Aplicar a função para cada campo
-configurarPesquisa(
-  document.getElementById("searchCidade"),
-  document.getElementById("suggestionsCidade"),
-  "cidade"
-);
+// Filtro geral
+function buscar(termo) {
+  termo = termo.toLowerCase();
+  const filtrados = dados.filter(d =>
+    d.cidade?.toLowerCase().includes(termo) ||
+    d.transportadora?.toLowerCase().includes(termo) ||
+    d.uf?.toLowerCase().includes(termo)
+  );
+  mostrarResultados(filtrados, termo);
+}
 
-configurarPesquisa(
-  document.getElementById("searchTransportadora"),
-  document.getElementById("suggestionsTransportadora"),
-  "transportadora"
-);
+// Sugestões automáticas
+inputGeral.addEventListener("input", () => {
+  const termo = inputGeral.value.toLowerCase();
+  sugestoes.innerHTML = "";
+  if (termo.length < 2) return;
 
-configurarPesquisa(
-  document.getElementById("searchUF"),
-  document.getElementById("suggestionsUF"),
-  "uf"
-);
+  const combinados = dados.flatMap(d => [d.cidade, d.transportadora, d.uf]);
+  const unicos = [...new Set(combinados.filter(v => v?.toLowerCase().includes(termo)))];
+  unicos.slice(0, 5).forEach(valor => {
+    const li = document.createElement("li");
+    li.textContent = valor;
+    li.onclick = () => {
+      inputGeral.value = valor;
+      sugestoes.innerHTML = "";
+      buscar(valor);
+    };
+    sugestoes.appendChild(li);
+  });
+});
+
+// Pressionar Enter
+inputGeral.addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    sugestoes.innerHTML = "";
+    buscar(inputGeral.value);
+  }
+});
+
+// Fechar sugestões ao clicar fora
+document.addEventListener("click", e => {
+  if (!sugestoes.contains(e.target) && e.target !== inputGeral) {
+    sugestoes.innerHTML = "";
+  }
+});
