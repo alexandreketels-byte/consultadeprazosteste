@@ -27,15 +27,13 @@ const inputGeral = document.getElementById("searchGeral");
 const sugestoes = document.getElementById("suggestionsGeral");
 const contador = document.getElementById("contadorResultados");
 
-// Destacar termo
-function destacar(texto, termo) {
-  if (!termo) return texto;
-  const regex = new RegExp(termo, "gi");
-  return texto.replace(regex, match => `<mark>${match}</mark>`);
+// Função para remover acentos
+function removerAcentos(str) {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 // Mostrar resultados
-function mostrarResultados(filtrados, termo) {
+function mostrarResultados(filtrados) {
   tbody.innerHTML = "";
   if (filtrados.length === 0) {
     tbody.innerHTML = "<tr><td colspan='5'>Nenhum resultado encontrado.</td></tr>";
@@ -46,9 +44,9 @@ function mostrarResultados(filtrados, termo) {
   filtrados.forEach(d => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
-      <td>${destacar(d.cidade || "", termo)}</td>
-      <td>${destacar(d.transportadora || "", termo)}</td>
-      <td>${destacar(d.uf || "", termo)}</td>
+      <td>${d.cidade || ""}</td>
+      <td>${d.transportadora || ""}</td>
+      <td>${d.uf || ""}</td>
       <td>${d.prazo || ""}</td>
       <td>${d.tipo || ""}</td>
     `;
@@ -58,25 +56,30 @@ function mostrarResultados(filtrados, termo) {
   contador.textContent = `${filtrados.length} resultado${filtrados.length > 1 ? "s" : ""} encontrado${filtrados.length > 1 ? "s" : ""}`;
 }
 
-// Filtro geral
+// Filtro geral (ignorando acentos)
 function buscar(termo) {
-  termo = termo.toLowerCase();
-  const filtrados = dados.filter(d =>
-    d.cidade?.toLowerCase().includes(termo) ||
-    d.transportadora?.toLowerCase().includes(termo) ||
-    d.uf?.toLowerCase().includes(termo)
-  );
-  mostrarResultados(filtrados, termo);
+  const termoNormalizado = removerAcentos(termo.toLowerCase());
+  const filtrados = dados.filter(d => {
+    const cidade = removerAcentos(d.cidade?.toLowerCase() || "");
+    const transp = removerAcentos(d.transportadora?.toLowerCase() || "");
+    const uf = removerAcentos(d.uf?.toLowerCase() || "");
+    return cidade.includes(termoNormalizado) || transp.includes(termoNormalizado) || uf.includes(termoNormalizado);
+  });
+  mostrarResultados(filtrados);
 }
 
-// Sugestões automáticas
+// Sugestões automáticas (também ignorando acentos)
 inputGeral.addEventListener("input", () => {
   const termo = inputGeral.value.toLowerCase();
+  const termoNormalizado = removerAcentos(termo);
   sugestoes.innerHTML = "";
   if (termo.length < 2) return;
 
   const combinados = dados.flatMap(d => [d.cidade, d.transportadora, d.uf]);
-  const unicos = [...new Set(combinados.filter(v => v?.toLowerCase().includes(termo)))];
+  const unicos = [...new Set(
+    combinados.filter(v => removerAcentos(v?.toLowerCase() || "").includes(termoNormalizado))
+  )];
+
   unicos.slice(0, 5).forEach(valor => {
     const li = document.createElement("li");
     li.textContent = valor;
