@@ -59,10 +59,10 @@ function configurarPesquisa(campoInput, campoSugestoes, propriedade) {
   });
 }
   
-// Mostrar tabela
-function mostrarResultados(cidade) {
+// Mostrar resultados na tabela
+function mostrarResultados(valor, campo) {
   tbody.innerHTML = "";
-  const filtrados = dados.filter(d => d.cidade.toLowerCase() === cidade.toLowerCase());
+  const filtrados = dados.filter(d => d[campo]?.toLowerCase().includes(valor.toLowerCase()));
   filtrados.forEach(d => {
     const tr = document.createElement("tr");
     tr.innerHTML = `
@@ -94,4 +94,3 @@ configurarPesquisa(
   document.getElementById("suggestionsUF"),
   "uf"
 );
-  
