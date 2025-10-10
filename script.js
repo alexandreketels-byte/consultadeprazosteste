@@ -94,5 +94,4 @@ configurarPesquisa(
   document.getElementById("suggestionsUF"),
   "uf"
 );
-  "UF"
-);
+  
