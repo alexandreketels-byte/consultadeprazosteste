@@ -80,17 +80,19 @@ function mostrarResultados(cidade) {
 configurarPesquisa(
   document.getElementById("searchCidade"),
   document.getElementById("suggestionsCidade"),
-  "Cidade"
+  "cidade"
 );
 
 configurarPesquisa(
   document.getElementById("searchTransportadora"),
   document.getElementById("suggestionsTransportadora"),
-  "Transportadora"
+  "transportadora"
 );
 
 configurarPesquisa(
   document.getElementById("searchUF"),
   document.getElementById("suggestionsUF"),
+  "uf"
+);
   "UF"
 );
