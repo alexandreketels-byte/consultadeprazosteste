@@ -113,3 +113,30 @@ document.addEventListener("click", e => {
     sugestoes.innerHTML = "";
   }
 });
+
+// ===== POP UP DE NOVO PROCEDIMENTO no arquivo json quando quiser colocar um pop up é so deixar como ativo e se não quiser é só deixar como false =====
+function mostrarPopup(mensagem) {
+  const popup = document.createElement("div");
+  popup.id = "popupAviso";
+  popup.innerHTML = `
+    <div class="popup-conteudo">
+      <p>${mensagem}</p>
+      <button id="fecharPopup">Ok</button>
+    </div>
+  `;
+  document.body.appendChild(popup);
+
+  document.getElementById("fecharPopup").addEventListener("click", () => {
+    popup.remove();
+  });
+}
+
+// Buscar status no popup.json
+fetch("popup.json")
+  .then(r => r.json())
+  .then(cfg => {
+    if (cfg.ativo) {
+      mostrarPopup(cfg.mensagem);
+    }
+  })
+  .catch(() => console.log("Popup desativado ou arquivo não encontrado"));
